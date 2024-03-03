@@ -1,0 +1,15 @@
+Postgres:
+    User: "talha"
+    Password: "123456789"
+    DatabaseName: "brainscape"
+    Host: "localhost"
+    SSLMode: disable
+    Port: 5432
+    MaxIdleConns: 15
+    MaxOpenConns: 100
+    ConnMaxLifetime: 5
+Server:
+    Port: "5000"
+    RunMode: debug
+Cors:
+    AllowOrigins: "*"
