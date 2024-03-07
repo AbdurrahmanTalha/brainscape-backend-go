@@ -12,6 +12,7 @@ type Config struct {
 	Postgres PostgreSQLConfig
 	Server   ServerConfig
 	Cors     CorsConfig
+	JWT      JWTConfig
 }
 
 type ServerConfig struct {
@@ -33,6 +34,13 @@ type PostgreSQLConfig struct {
 	MaxIdleConns    int
 	MaxOpenConns    int
 	ConnMaxLifetime time.Duration
+}
+
+type JWTConfig struct {
+	AccessTokenSecret     string
+	AccessTokenExpiresIn  int
+	RefreshTokenSecret    string
+	RefreshTokenExpiresIn int
 }
 
 func SetupConfig() *Config {

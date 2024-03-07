@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/AbdurrahmanTalha/brainscape-backend-go/api/dto"
@@ -34,10 +35,24 @@ func (h *UserController) Register(c *gin.Context) {
 		return
 	}
 
-	token, err := h.service.Login(req)
-	if err != nil {
+	c.JSON(http.StatusCreated, helper.GenerateBaseResponse("", true, helper.Success))
+}
 
+func (h *UserController) Login(c *gin.Context) {
+	req := new(dto.LoginRequest)
+	err := c.ShouldBindJSON(&req)
+
+	if err != nil {
+		fmt.Println(err, "1");
+		return
 	}
 
+	token, err := h.service.Login(req)
+	if err != nil {
+		fmt.Println(err, "2");
+		return;
+	}
+	
 	c.JSON(http.StatusCreated, helper.GenerateBaseResponse(token, true, helper.Success))
+
 }

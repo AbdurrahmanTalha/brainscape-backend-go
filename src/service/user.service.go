@@ -1,7 +1,11 @@
 package services
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/AbdurrahmanTalha/brainscape-backend-go/api/dto"
+	"github.com/AbdurrahmanTalha/brainscape-backend-go/api/helper"
 	"github.com/AbdurrahmanTalha/brainscape-backend-go/common"
 	"github.com/AbdurrahmanTalha/brainscape-backend-go/config"
 	"github.com/AbdurrahmanTalha/brainscape-backend-go/data/db"
@@ -35,7 +39,6 @@ func (s *UserService) Register(req *dto.RegisterUserRequest) error {
 	if exists {
 		return err
 	}
-
 	u.Password = common.HashPassword(u.Password)
 
 	transaction := s.database.Begin()
@@ -48,6 +51,27 @@ func (s *UserService) Register(req *dto.RegisterUserRequest) error {
 	return nil
 }
 
+func (s *UserService) Login(req *dto.LoginRequest) (string, error) {
+	var user models.User
+	err := s.database.Model(&models.User{}).Where("email = ?", req.Email).Find(&user).Error
+
+	if err != nil {
+		return "", err
+	}
+
+	err = common.ComparePassword(user.Password, req.Password)
+	if err != nil {
+		fmt.Println("Here 1")
+		return "", err
+	}
+	tokenData := map[string]interface{}{"email": user.Email, "role": user.Role, "fullName": user.FullName}
+
+	accessToken, err := helper.GenerateJSONToken(tokenData, s.cfg.JWT.AccessTokenSecret, time.Duration(s.cfg.JWT.AccessTokenExpiresIn))
+	fmt.Println(accessToken)
+
+	return accessToken, nil
+}
+
 func (s *UserService) isExistByEmail(email string) (bool, error) {
 	var count int64
 	if err := s.database.Model(&models.User{}).Where("email = ?", email).Count(&count).Error; err != nil {
@@ -55,13 +79,4 @@ func (s *UserService) isExistByEmail(email string) (bool, error) {
 	}
 
 	return count > 0, nil
-}
-
-func (s *UserService) Login(req *dto.LoginRequest) (*dto) {
-	var user models.User;
-	err := s.database.Model(&models.User{}).Where("email = ?", req.Email).Find(&user).Error;
-	if err != nil {
-		return nil, err;
-	}
-	return ""
 }

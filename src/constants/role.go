@@ -7,3 +7,11 @@ const (
 	Teacher Role = "teacher"
 	Student Role = "student"
 )
+/* 
+ - Some has sent a email. 
+
+
+ */
+
+// - Incremental ID
+// - 

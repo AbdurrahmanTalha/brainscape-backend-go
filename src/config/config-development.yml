@@ -13,3 +13,8 @@ Server:
     RunMode: debug
 Cors:
     AllowOrigins: "*"
+JWT:
+    AccessTokenSecret: "accessTokenSecret"
+    RefreshTokenSecret: "refreshTokenSecreter"
+    AccessTokenExpiresIn: 1440
+    RefreshTokenExpiresIn: 60
