@@ -9,6 +9,9 @@ import (
 func User(router *gin.RouterGroup, cfg *config.Config) {
 	controller := controllers.NewUserController(cfg)
 
+	router.GET("/", controller.GetAllUsers)
+
 	router.POST("/register", controller.Register)
+	
 	router.POST("/login", controller.Login)
 }

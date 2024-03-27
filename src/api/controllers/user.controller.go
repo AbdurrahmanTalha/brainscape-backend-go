@@ -52,7 +52,7 @@ func (h *UserController) Register(c *gin.Context) {
 		return
 	}
 
-	fmt.Printf("%+v", user);
+	fmt.Printf("%+v", user)
 
 	c.JSON(http.StatusCreated, helper.GenerateBaseResponse(true, "Successfully created user", http.StatusCreated, &user))
 }
@@ -76,7 +76,7 @@ func (h *UserController) Login(c *gin.Context) {
 	token, err := h.service.Login(req)
 	if err != nil {
 		c.JSON(
-			http.StatusCreated,
+			http.StatusBadRequest,
 			helper.GenerateBaseResponseWithError(
 				http.StatusBadRequest,
 				err,
@@ -87,4 +87,29 @@ func (h *UserController) Login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, helper.GenerateBaseResponse(true, "Successfully logged in user", http.StatusCreated, token))
+}
+
+func (h *UserController) GetAllUsers(c *gin.Context) {
+	result, err := h.service.GetAllUsers()
+
+	if err != nil {
+		c.JSON(
+			http.StatusBadRequest,
+			helper.GenerateBaseResponseWithError(
+				http.StatusBadRequest,
+				err,
+				"Failed to find all users",
+			),
+		)
+		return
+	}
+
+	c.JSON(http.StatusOK,
+		helper.GenerateBaseResponse(
+			true,
+			"Successfully found all users",
+			http.StatusOK,
+			result,
+		),
+	)
 }

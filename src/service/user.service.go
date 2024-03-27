@@ -59,7 +59,7 @@ func (s *UserService) Login(req *dto.LoginRequest) (*dto.TokenDetail, error) {
 	}
 
 	err = common.ComparePassword(string(user.Password), req.Password)
-	
+
 	if err != nil {
 		return nil, errors.New("password does'nt match")
 	}
@@ -88,15 +88,13 @@ func (s *UserService) Login(req *dto.LoginRequest) (*dto.TokenDetail, error) {
 	}, nil
 }
 
-func (s *UserService) GetAllUsers() {
+func (s *UserService) GetAllUsers() ([]models.User, error) {
 	var users []models.User
 	if err := s.database.Find(&users).Error; err != nil {
-		fmt.Printf("Error retrieving users: %v", err)
+		return nil, errors.New("something went wrong!")
 	}
 
-	for _, user := range users {
-		fmt.Printf("ID: %d, Full Name: %s, Email: %s", user.ID, user.FullName, user.Email)
-	}
+	return users, nil
 }
 
 func (s *UserService) isExistByEmail(email string) (bool, error) {
