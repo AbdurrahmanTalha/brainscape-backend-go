@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/AbdurrahmanTalha/brainscape-backend-go/api/dto"
@@ -29,7 +30,6 @@ func (h *UserController) Register(c *gin.Context) {
 		c.JSON(
 			http.StatusCreated,
 			helper.GenerateBaseResponseWithError(
-				false,
 				http.StatusBadRequest,
 				err,
 				"Failed to create user",
@@ -39,11 +39,11 @@ func (h *UserController) Register(c *gin.Context) {
 	}
 
 	user, err := h.service.Register(req)
+
 	if err != nil {
 		c.JSON(
 			http.StatusCreated,
 			helper.GenerateBaseResponseWithError(
-				false,
 				http.StatusBadRequest,
 				err,
 				"Failed to create user",
@@ -52,7 +52,9 @@ func (h *UserController) Register(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, helper.GenerateBaseResponse(true, "Successfully created user", http.StatusCreated, user))
+	fmt.Printf("%+v", user);
+
+	c.JSON(http.StatusCreated, helper.GenerateBaseResponse(true, "Successfully created user", http.StatusCreated, &user))
 }
 
 func (h *UserController) Login(c *gin.Context) {
@@ -63,7 +65,6 @@ func (h *UserController) Login(c *gin.Context) {
 		c.JSON(
 			http.StatusCreated,
 			helper.GenerateBaseResponseWithError(
-				false,
 				http.StatusBadRequest,
 				err,
 				"Failed to bind json",
@@ -77,7 +78,6 @@ func (h *UserController) Login(c *gin.Context) {
 		c.JSON(
 			http.StatusCreated,
 			helper.GenerateBaseResponseWithError(
-				false,
 				http.StatusBadRequest,
 				err,
 				"Failed to login user",

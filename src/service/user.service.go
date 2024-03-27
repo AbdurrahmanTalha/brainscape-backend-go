@@ -27,7 +27,7 @@ func NewUserService(cfg *config.Config) *UserService {
 		database: database,
 	}
 }
-func (s *UserService) Register(req *dto.RegisterUserRequest) (any, error) {
+func (s *UserService) Register(req *dto.RegisterUserRequest) (*models.User, error) {
 	u := models.User{FullName: req.FullName, Email: req.Email, Role: "student"}
 
 	exists, _ := s.isExistByEmail(req.Email)
@@ -36,7 +36,7 @@ func (s *UserService) Register(req *dto.RegisterUserRequest) (any, error) {
 		return nil, errors.New("user already exists")
 	}
 
-	u.Password = []byte(common.HashPassword(string(u.Password)))
+	u.Password = []byte(common.HashPassword(string(req.Password)))
 	transaction := s.database.Begin()
 	result := transaction.Create(&u)
 
@@ -47,7 +47,7 @@ func (s *UserService) Register(req *dto.RegisterUserRequest) (any, error) {
 	}
 	transaction.Commit()
 
-	return result, nil
+	return &u, nil
 }
 
 func (s *UserService) Login(req *dto.LoginRequest) (*dto.TokenDetail, error) {
@@ -61,7 +61,7 @@ func (s *UserService) Login(req *dto.LoginRequest) (*dto.TokenDetail, error) {
 	err = common.ComparePassword(string(user.Password), req.Password)
 	
 	if err != nil {
-		return nil, err
+		return nil, errors.New("password does'nt match")
 	}
 
 	tokenData := map[string]interface{}{

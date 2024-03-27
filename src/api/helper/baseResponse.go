@@ -18,8 +18,8 @@ func GenerateBaseResponse(success bool, message string, statusCode int, result a
 	}
 }
 
-func GenerateBaseResponseWithError(result any, statusCode int, err error, message string) *BaseHttpResponse {
-	return &BaseHttpResponse{Result: result,
+func GenerateBaseResponseWithError(statusCode int, err error, message string) *BaseHttpResponse {
+	return &BaseHttpResponse{
 		Success:    false,
 		StatusCode: statusCode,
 		Error:      err.Error(),
