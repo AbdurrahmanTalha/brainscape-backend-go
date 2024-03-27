@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/AbdurrahmanTalha/brainscape-backend-go/api/dto"
@@ -27,15 +26,33 @@ func (h *UserController) Register(c *gin.Context) {
 	err := c.ShouldBindJSON(&req)
 
 	if err != nil {
+		c.JSON(
+			http.StatusCreated,
+			helper.GenerateBaseResponseWithError(
+				false,
+				http.StatusBadRequest,
+				err,
+				"Failed to create user",
+			),
+		)
 		return
 	}
 
-	err = h.service.Register(req)
+	user, err := h.service.Register(req)
 	if err != nil {
+		c.JSON(
+			http.StatusCreated,
+			helper.GenerateBaseResponseWithError(
+				false,
+				http.StatusBadRequest,
+				err,
+				"Failed to create user",
+			),
+		)
 		return
 	}
 
-	c.JSON(http.StatusCreated, helper.GenerateBaseResponse("", true, helper.Success))
+	c.JSON(http.StatusCreated, helper.GenerateBaseResponse(true, "Successfully created user", http.StatusCreated, user))
 }
 
 func (h *UserController) Login(c *gin.Context) {
@@ -43,16 +60,31 @@ func (h *UserController) Login(c *gin.Context) {
 	err := c.ShouldBindJSON(&req)
 
 	if err != nil {
-		fmt.Println(err, "1");
+		c.JSON(
+			http.StatusCreated,
+			helper.GenerateBaseResponseWithError(
+				false,
+				http.StatusBadRequest,
+				err,
+				"Failed to bind json",
+			),
+		)
 		return
 	}
 
 	token, err := h.service.Login(req)
 	if err != nil {
-		fmt.Println(err, "2");
-		return;
+		c.JSON(
+			http.StatusCreated,
+			helper.GenerateBaseResponseWithError(
+				false,
+				http.StatusBadRequest,
+				err,
+				"Failed to login user",
+			),
+		)
+		return
 	}
-	
-	c.JSON(http.StatusCreated, helper.GenerateBaseResponse(token, true, helper.Success))
 
+	c.JSON(http.StatusCreated, helper.GenerateBaseResponse(true, "Successfully logged in user", http.StatusCreated, token))
 }

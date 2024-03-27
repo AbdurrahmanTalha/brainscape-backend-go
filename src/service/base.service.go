@@ -6,7 +6,6 @@ import (
 	"github.com/AbdurrahmanTalha/brainscape-backend-go/common"
 	"github.com/AbdurrahmanTalha/brainscape-backend-go/config"
 	"github.com/AbdurrahmanTalha/brainscape-backend-go/data/db"
-	"github.com/AbdurrahmanTalha/brainscape-backend-go/data/models"
 	"gorm.io/gorm"
 )
 
@@ -36,9 +35,9 @@ func (s *BaseService[T, Tc, Tu, Tr]) Create(ctx context.Context, req *Tc) (*Tr, 
 	}
 
 	transaction.Commit()
-	bm, _ := common.TypeConverter[models.BaseModel](data)
+	bm, _ := common.TypeConverter[Tr](data)
 
-	return s.GetById(ctx, bm.Id)
+	return bm, nil
 }
 
 func (s *BaseService[T, Tc, Tu, Tr]) GetById(ctx context.Context, id int) (*Tr, error) {
@@ -54,11 +53,10 @@ func (s *BaseService[T, Tc, Tu, Tr]) GetById(ctx context.Context, id int) (*Tr, 
 	return common.TypeConverter[Tr](model)
 }
 
-
 func Preload(db *gorm.DB, preloads []preload) *gorm.DB {
 	for _, item := range preloads {
-		db = db.Preload(item.string);
+		db = db.Preload(item.string)
 	}
-	
-	return db;
+
+	return db
 }

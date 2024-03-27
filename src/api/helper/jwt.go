@@ -6,8 +6,8 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-func GenerateJSONToken(tokenData map[string]interface{}, jwtSecret string, expiresAt time.Duration) (string, error) {
-	expiredAt := time.Now().Add(time.Duration(time.Second) * expiresAt).Unix()
+func GenerateJSONToken(tokenData map[string]interface{}, jwtSecret string, expiresAt int) (string, error) {
+	expiredAt := time.Now().Add(time.Duration(time.Second) * time.Duration(expiresAt)).Unix()
 	claims := jwt.MapClaims{}
 
 	claims["expiredAt"] = expiredAt
