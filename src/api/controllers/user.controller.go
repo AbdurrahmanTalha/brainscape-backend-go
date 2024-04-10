@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/AbdurrahmanTalha/brainscape-backend-go/api/dto"
 	"github.com/AbdurrahmanTalha/brainscape-backend-go/api/helper"
@@ -31,8 +32,9 @@ func (h *UserController) Register(c *gin.Context) {
 			http.StatusCreated,
 			helper.GenerateBaseResponseWithError(
 				http.StatusBadRequest,
+				false,
+				http.StatusBadRequest,
 				err,
-				"Failed to create user",
 			),
 		)
 		return
@@ -45,8 +47,9 @@ func (h *UserController) Register(c *gin.Context) {
 			http.StatusCreated,
 			helper.GenerateBaseResponseWithError(
 				http.StatusBadRequest,
+				false,
+				http.StatusBadRequest,
 				err,
-				"Failed to create user",
 			),
 		)
 		return
@@ -54,7 +57,11 @@ func (h *UserController) Register(c *gin.Context) {
 
 	fmt.Printf("%+v", user)
 
-	c.JSON(http.StatusCreated, helper.GenerateBaseResponse(true, "Successfully created user", http.StatusCreated, &user))
+	c.JSON(http.StatusCreated, helper.GenerateBaseResponse(
+		&user,
+		true,
+		http.StatusCreated,
+	))
 }
 
 func (h *UserController) Login(c *gin.Context) {
@@ -66,8 +73,9 @@ func (h *UserController) Login(c *gin.Context) {
 			http.StatusCreated,
 			helper.GenerateBaseResponseWithError(
 				http.StatusBadRequest,
+				false,
+				http.StatusBadRequest,
 				err,
-				"Failed to bind json",
 			),
 		)
 		return
@@ -79,14 +87,15 @@ func (h *UserController) Login(c *gin.Context) {
 			http.StatusBadRequest,
 			helper.GenerateBaseResponseWithError(
 				http.StatusBadRequest,
+				false,
+				http.StatusBadRequest,
 				err,
-				"Failed to login user",
 			),
 		)
 		return
 	}
-
-	c.JSON(http.StatusCreated, helper.GenerateBaseResponse(true, "Successfully logged in user", http.StatusCreated, token))
+	/* result any, success bool, resultCode ResultCode */
+	c.JSON(http.StatusCreated, helper.GenerateBaseResponse(token, true, http.StatusCreated))
 }
 
 func (h *UserController) GetAllUsers(c *gin.Context) {
@@ -97,8 +106,9 @@ func (h *UserController) GetAllUsers(c *gin.Context) {
 			http.StatusBadRequest,
 			helper.GenerateBaseResponseWithError(
 				http.StatusBadRequest,
+				false,
+				http.StatusBadRequest,
 				err,
-				"Failed to find all users",
 			),
 		)
 		return
@@ -106,10 +116,40 @@ func (h *UserController) GetAllUsers(c *gin.Context) {
 
 	c.JSON(http.StatusOK,
 		helper.GenerateBaseResponse(
-			true,
-			"Successfully found all users",
-			http.StatusOK,
 			result,
+			true,
+			http.StatusOK,
 		),
 	)
+}
+
+func (h *UserController) GetSpecificUser(c *gin.Context) {
+	id := c.Param("id")
+	convertedId, err := strconv.ParseUint(id, 0, 64)
+
+	if err != nil {
+		helper.GenerateBaseResponseWithError(
+			http.StatusBadRequest,
+			false,
+			http.StatusBadRequest,
+			err,
+		)
+	}
+
+	result, err := h.service.GetSpecificUser(uint(convertedId))
+
+	if err != nil {
+		helper.GenerateBaseResponseWithError(
+			http.StatusBadRequest,
+			false,
+			http.StatusBadRequest,
+			err,
+		)
+	}
+
+	c.JSON(http.StatusOK, helper.GenerateBaseResponse(result, true, http.StatusOK))
+}
+
+func (h *UserController) UpdateSpecificUser(c *gin.Context) {
+	Update(c, h.service.Update)
 }

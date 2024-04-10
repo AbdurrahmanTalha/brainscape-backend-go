@@ -30,7 +30,7 @@ func RegisterRoutes(r *gin.Engine, cfg *config.Config) {
 	v1 := api.Group("/v1")
 	{
 		user := v1.Group("/user")
-
+		
 		routers.User(user, cfg)
 	}
 }

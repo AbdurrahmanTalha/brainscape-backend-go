@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -16,7 +17,7 @@ import (
 type UserService struct {
 	cfg      *config.Config
 	database *gorm.DB
-	/* base     *BaseService[models.User, dto.RegisterUserRequest, dto.UpdatePropertyRequest, dto.PropertyResponse] */
+	base     *BaseService[models.User, dto.RegisterUserRequest, dto.UpdateUserRequest, dto.UserResponse]
 }
 
 func NewUserService(cfg *config.Config) *UserService {
@@ -25,6 +26,10 @@ func NewUserService(cfg *config.Config) *UserService {
 	return &UserService{
 		cfg:      cfg,
 		database: database,
+		base: &BaseService[models.User, dto.RegisterUserRequest, dto.UpdateUserRequest, dto.UserResponse]{
+			database: database,
+			preloads: []preload{},
+		},
 	}
 }
 func (s *UserService) Register(req *dto.RegisterUserRequest) (*models.User, error) {
@@ -91,10 +96,22 @@ func (s *UserService) Login(req *dto.LoginRequest) (*dto.TokenDetail, error) {
 func (s *UserService) GetAllUsers() ([]models.User, error) {
 	var users []models.User
 	if err := s.database.Find(&users).Error; err != nil {
-		return nil, errors.New("something went wrong!")
+		return nil, errors.New("something went wrong")
 	}
 
 	return users, nil
+}
+
+func (s *UserService) GetSpecificUser(id uint) (*models.User, error) {
+	var result models.User
+
+	if err := s.database.First(&result, "id = ?", id).Error; err != nil {
+		fmt.Println("Error retrieving user:", err)
+
+		return nil, errors.New("failed to retrieve user")
+	}
+
+	return &result, nil
 }
 
 func (s *UserService) isExistByEmail(email string) (bool, error) {
@@ -106,4 +123,8 @@ func (s *UserService) isExistByEmail(email string) (bool, error) {
 	}
 
 	return count > 0, nil
+}
+
+func (s *UserService) Update(ctx context.Context, id int, req *dto.UpdateUserRequest) (*dto.UserResponse, error) {
+	return s.base.Update(ctx, id, req)
 }

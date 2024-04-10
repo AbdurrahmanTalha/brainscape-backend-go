@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/AbdurrahmanTalha/brainscape-backend-go/common"
 	"github.com/AbdurrahmanTalha/brainscape-backend-go/config"
@@ -14,19 +15,19 @@ type preload struct {
 }
 
 type BaseService[T any, Tc any, Tu any, Tr any] struct {
-	Database *gorm.DB
-	Preloads []preload
+	database *gorm.DB
+	preloads []preload
 }
 
 func NewBaseService[T any, Tc any, Tu any, Tr any](cfg *config.Config) *BaseService[T, Tc, Tu, Tr] {
 	return &BaseService[T, Tc, Tu, Tr]{
-		Database: db.GetDB(),
+		database: db.GetDB(),
 	}
 }
 
 func (s *BaseService[T, Tc, Tu, Tr]) Create(ctx context.Context, req *Tc) (*Tr, error) {
 	data, _ := common.TypeConverter[T](req)
-	transaction := s.Database.WithContext(ctx).Begin()
+	transaction := s.database.WithContext(ctx).Begin()
 	err := transaction.Create(data).Error
 
 	if err != nil {
@@ -42,14 +43,14 @@ func (s *BaseService[T, Tc, Tu, Tr]) Create(ctx context.Context, req *Tc) (*Tr, 
 
 func (s *BaseService[T, Tc, Tu, Tr]) GetById(ctx context.Context, id int) (*Tr, error) {
 	model := new(T)
-	db := Preload(s.Database, s.Preloads)
+	db := Preload(s.database, s.preloads)
 
-	err := db.Where("id = ? and deleted_by is null", id).First(model).Error
-
+	err := db.Where("id = ?", id).First(model).Error
+	fmt.Println(err)
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Println(model)
 	return common.TypeConverter[Tr](model)
 }
 
@@ -59,4 +60,25 @@ func Preload(db *gorm.DB, preloads []preload) *gorm.DB {
 	}
 
 	return db
+}
+
+func (s *BaseService[T, Tc, Tu, Tr]) Update(ctx context.Context, id int, req *Tu) (*Tr, error) {
+	updateMap, _ := common.TypeConverter[map[string]interface{}](req)
+	snakeMap := map[string]interface{}{}
+	fmt.Println(updateMap)
+	fmt.Println(snakeMap)
+	for k, v := range *updateMap {
+		snakeMap[common.ToSnakeCase(k)] = v
+	}
+	
+	model := new(T)
+	tx := s.database.WithContext(ctx).Begin()
+	if err := tx.Model(model).Where("id = ?", id).Updates(snakeMap).Error; err != nil {
+		tx.Rollback()
+
+		return nil, err
+	}
+	tx.Commit()
+
+	return s.GetById(ctx, id)
 }
